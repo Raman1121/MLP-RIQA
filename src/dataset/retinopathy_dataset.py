@@ -3,7 +3,7 @@ from torchvision import transforms as T
 from torchvision.io import read_image
 
 class RetinopathyDataset(Dataset):
-    def __init__(self, train_df, transforms=None, threshold=None):
+    def __init__(self, train_df, transforms=None, threshold=None, categorical_partitition=True, cat_labels_to_include=['Good', 'Usable', 'Bad']):
         """
             Parameters
             ----------
@@ -13,13 +13,31 @@ class RetinopathyDataset(Dataset):
                 A list of torchvision transformers to be applied to the training images.
             threshold : float, default: None
                 The quality threshold below images would be discarded from the training set.
+            categorical_partition : bool, default: True
+                A variable to denote if RIQA labels are categorical in nature.
+            cat_labels_to_include : list, default: ['Good', 'Usable', 'Bad']
+                A list of categorical labels to be included in our dataset
         """
 
         self.train_df = train_df
         self.transforms = transforms
         self.threshold = threshold
+        self.categorical_partitition = categorical_partitition
+        self.cat_labels = cat_labels_to_include
 
-        if(self.threshold):
+        if(self.categorical_partitition == True):
+            #This means we have categorical labels for image quality ['Good', 'Usable', 'Bad'] instead of continuous labels
+            self.threshold = None   #Continuous labels threshold does not matter in this case
+
+            if(self.cat_labels == None):
+                raise AssertionError("Categorical labels should be provided when 'categorical partition' is set to True")
+            else:
+                self.train_df = self.train_df[self.train_df['quality'].isin(self.cat_labels).reset_index(drop=True)]
+
+        else:
+            if(self.threshold == None):
+                raise AssertionError("Threshold should be provided when 'categorical_partitition' is false.")
+                
             self.train_df = self.train_df[self.train_df['score']>=self.threshold].reset_index(drop=True)
 
     def __len__(self):
