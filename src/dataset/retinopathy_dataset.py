@@ -2,8 +2,14 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms as T
 from torchvision.io import read_image
 
+import yaml
+
+with open('config_train_DR.yaml') as file:
+    yaml_data = yaml.safe_load(file)
+
 class RetinopathyDataset(Dataset):
-    def __init__(self, train_df, transforms=None, threshold=None, categorical_partitition=True, cat_labels_to_include=['Good', 'Usable', 'Bad']):
+    def __init__(self, train_df, transforms=None, threshold=None, 
+                 categorical_partitition=True, cat_labels_to_include=yaml_data['train']['cat_labels']):
         """
             Parameters
             ----------
@@ -26,7 +32,7 @@ class RetinopathyDataset(Dataset):
         self.cat_labels = cat_labels_to_include
 
         if(self.categorical_partitition == True):
-            #This means we have categorical labels for image quality ['Good', 'Usable', 'Bad'] instead of continuous labels
+            #This means we have categorical labels for image quality ['Good', 'Usable', 'Reject'] instead of continuous labels
             self.threshold = None   #Continuous labels threshold does not matter in this case
 
             if(self.cat_labels == None):
