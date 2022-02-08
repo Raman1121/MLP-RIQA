@@ -7,13 +7,15 @@ import yaml
 with open('config_train_DR.yaml') as file:
     yaml_data = yaml.safe_load(file)
 
+#yaml_data = read_config_file(verbose=True)
+
 class RetinopathyDataset(Dataset):
-    def __init__(self, train_df, transforms=None, threshold=None, 
+    def __init__(self, df, transforms=None, threshold=None, 
                  categorical_partitition=True, cat_labels_to_include=yaml_data['train']['cat_labels']):
         """
             Parameters
             ----------
-            train_df : pandas.core.frame.DataFrame
+            df : pandas.core.frame.DataFrame
                 Dataframe containing image paths ['image'], retinopathy level ['level'], and image quality scores ['score']
             transforms : torchvision.transforms.transforms.Compose, default: None
                 A list of torchvision transformers to be applied to the training images.
@@ -25,7 +27,7 @@ class RetinopathyDataset(Dataset):
                 A list of categorical labels to be included in our dataset
         """
 
-        self.train_df = train_df
+        self.df = df
         self.transforms = transforms
         self.threshold = threshold
         self.categorical_partitition = categorical_partitition
@@ -38,13 +40,13 @@ class RetinopathyDataset(Dataset):
             if(self.cat_labels == None):
                 raise AssertionError("Categorical labels should be provided when 'categorical partition' is set to True")
             else:
-                self.train_df = self.train_df[self.train_df['quality'].isin(self.cat_labels).reset_index(drop=True)]
+                self.df = self.df[self.df['quality'].isin(self.cat_labels).reset_index(drop=True)]
 
         else:
             if(self.threshold == None):
                 raise AssertionError("Threshold should be provided when 'categorical_partitition' is false.")
                 
-            self.train_df = self.train_df[self.train_df['score']>=self.threshold].reset_index(drop=True)
+            self.df = self.df[self.df['score']>=self.threshold].reset_index(drop=True)
 
     def __len__(self):
         """
@@ -53,7 +55,7 @@ class RetinopathyDataset(Dataset):
 
             Number of samples in our dataset.
         """
-        return len(self.train_df)
+        return len(self.df)
 
     def __getitem__(self, idx):
         """
@@ -65,8 +67,8 @@ class RetinopathyDataset(Dataset):
             -------
             An image and a label from the dataset based on the given index idx.
         """
-        image = read_image(self.train_df['image'][idx])
-        label = self.train_df['level'][idx]
+        image = read_image(self.df['image'][idx])
+        label = self.df['level'][idx]
 
         if(self.transforms):
             image = self.transforms(image)

@@ -1,12 +1,13 @@
 import torch
 from torch import nn
+import torch.nn.functional as F
 import torchvision.models as models
 from torch.optim import Adam
 
 from dataset import retinopathy_dataset
 
 from pytorch_lightning.core.lightning import LightningModule
-from torchmetrics import Accuracy
+import torchmetrics
 from torch.nn.functional import cross_entropy
 
 class RetinopathyClassificationModel(LightningModule):
@@ -17,6 +18,8 @@ class RetinopathyClassificationModel(LightningModule):
         self.pretrained = pretrained
         self.num_classes = num_classes
         self.lr = lr
+        self.loss = nn.CrossEntropyLoss()
+        
 
         if(self.encoder == 'resnet50'):
             self.model = models.resnet50(pretrained=self.pretrained)
@@ -35,12 +38,35 @@ class RetinopathyClassificationModel(LightningModule):
         
     def training_step(self, batch, batch_idx):
         # return the loss given a batch: this has a computational graph attached to it: optimization
+        # x, y = batch
+        # preds = self.model(x)
+        # loss = cross_entropy(preds, y)
+        # self.log('train_loss', loss)  # lightning detaches your loss graph and uses its value
+        # #self.log('train_acc', Accuracy(preds, y))
+        # return loss
+
         x, y = batch
-        preds = self.model(x)
-        loss = cross_entropy(preds, y)
-        self.log('train_loss', loss)  # lightning detaches your loss graph and uses its value
-        #self.log('train_acc', Accuracy(preds, y))
+        logits = self.model(x)
+        loss = self.loss(logits, y)
+
+        #Training metrics
+        preds = torch.argmax(logits, dim=1)
+        acc = torchmetrics.functional.accuracy(preds, y)
+        self.log('train_loss', loss, on_step=True, on_epoch=True)
+        self.log('train_acc', acc, on_step=True, on_epoch=True)
+
         return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        logits = self.model(x)
+        loss = self.loss(logits, y)
+
+        #Validation metrics
+        preds = torch.argmax(logits, dim=1)
+        acc = torchmetrics.functional.accuracy(preds, y)
+        self.log('val_loss', loss, on_step=True, on_epoch=True)
+        self.log('val_acc', acc, on_step=True, on_epoch=True)
 
     def configure_optimizers(self):
         # return optimizer

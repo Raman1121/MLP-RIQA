@@ -1,13 +1,18 @@
 model:
   encoder: 'resnet18' #Encoder Model
+
 train:
-  batch_size: 4 #Batch Size
+  batch_size: 32 #Batch Size
   epochs: 10  #Number of epochs
   num_classes: 5  #Number of target classes
   train_df_path: '/home/raman/MLP-RIQA/Train_set_RIQA_DR_Labels.csv' #Path to read the training dataset file
-  gpus: 0 #Number of GPUs
+  gpus: 1 #Number of GPUs
   cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the training set
   lr: 0.001 #Learning Rate
+  validation_split: 0.3 #Partition for validation data
+  seed: 42
+  verbose: True #To print all configurations while running the script
+
 dataset:
   root_path: '/home/raman/MLP-RIQA/data/diabetic-retinopathy-detection/'  #Root path to the images
   RIQA_train_labels: '/home/raman/MLP-RIQA/Annotated RIQA Labels files/train_set_result'  #Path to RIQA labels of training set
