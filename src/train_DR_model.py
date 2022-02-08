@@ -34,11 +34,15 @@ train_transform = T.Compose([
 ])
 
 
-# Creating training and validation splits
 main_df = pd.read_csv(yaml_data['train']['train_df_path'])
+test_df = pd.read_csv(yaml_data['test']['test_df_path'])
+
+main_df['image'] = main_df['image'].apply(lambda x: str(yaml_data['dataset']['root_path']+'final_train/train/'+x))
+test_df['image'] = test_df['image'].apply(lambda x: str(yaml_data['dataset']['root_path']+'final_test/test/'+x))
+
+# Creating training and validation splits
 train_df, val_df = train_test_split(main_df, test_size=yaml_data['train']['validation_split'],
                                     random_state=yaml_data['train']['seed'])
-test_df = pd.read_csv(yaml_data['test']['test_df_path'])
 
 train_df = train_df.reset_index(drop=True)
 val_df = val_df.reset_index(drop=True)
