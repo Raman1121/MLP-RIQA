@@ -34,17 +34,8 @@ class RetinopathyClassificationModel(LightningModule):
         #Attaching a new classification layer on the top of the model
         self.model.fc = torch.nn.Linear(self.model.fc.in_features, self.num_classes)
         
-        
-        
     def training_step(self, batch, batch_idx):
-        # return the loss given a batch: this has a computational graph attached to it: optimization
-        # x, y = batch
-        # preds = self.model(x)
-        # loss = cross_entropy(preds, y)
-        # self.log('train_loss', loss)  # lightning detaches your loss graph and uses its value
-        # #self.log('train_acc', Accuracy(preds, y))
-        # return loss
-
+        
         x, y = batch
         logits = self.model(x)
         loss = self.loss(logits, y)
@@ -68,7 +59,22 @@ class RetinopathyClassificationModel(LightningModule):
         self.log('val_loss', loss, on_step=True, on_epoch=True)
         self.log('val_acc', acc, on_step=True, on_epoch=True)
 
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        x, y = batch
+        logits = self.model(x)
+        loss = self.loss(logits, y)
+
+        #Validation metrics
+        preds = torch.argmax(logits, dim=1)
+        acc = torchmetrics.functional.accuracy(preds, y)
+        self.log('test_loss', loss, on_step=True, on_epoch=True)
+        self.log('test_acc', acc, on_step=True, on_epoch=True)
+
+        return loss
+
     def configure_optimizers(self):
-        # return optimizer
+        
         optimizer = Adam(self.model.fc.parameters(), lr=self.lr)
         return optimizer

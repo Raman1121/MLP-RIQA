@@ -38,6 +38,7 @@ train_transform = T.Compose([
 main_df = pd.read_csv(yaml_data['train']['train_df_path'])
 train_df, val_df = train_test_split(main_df, test_size=yaml_data['train']['validation_split'],
                                     random_state=yaml_data['train']['seed'])
+test_df = pd.read_csv(yaml_data['test']['test_df_path'])
 
 train_df = train_df.reset_index(drop=True)
 val_df = val_df.reset_index(drop=True)
@@ -45,6 +46,7 @@ val_df = val_df.reset_index(drop=True)
 print("Length of Main df: ", len(main_df))
 print("Length of Training df: ", len(train_df))
 print("Length of Validation df: ", len(val_df))
+print("Length of Test df: ", len(test_df))
 
 #Creating Datasets
 train_dataset = retinopathy_dataset.RetinopathyDataset(df=train_df, categorical_partitition=True,
@@ -53,14 +55,20 @@ train_dataset = retinopathy_dataset.RetinopathyDataset(df=train_df, categorical_
 val_dataset = retinopathy_dataset.RetinopathyDataset(df=val_df, categorical_partitition=True,
                                                 cat_labels_to_include=yaml_data['train']['cat_labels'], transforms=train_transform)
 
+test_dataset = retinopathy_dataset.RetinopathyDataset(df=test_df, categorical_partitition=True,
+                                                cat_labels_to_include=yaml_data['train']['cat_labels'], transforms=train_transform)
+
 #Creating Dataloaders
 train_loader = DataLoader(train_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=True, num_workers=12)
 val_loader = DataLoader(val_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
+test_loader = DataLoader(test_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
 
 
 classifier = retinopathy_model.RetinopathyClassificationModel(encoder=yaml_data['model']['encoder'], pretrained=True, 
                                                             num_classes=yaml_data['train']['num_classes'], lr=yaml_data['train']['lr'])
 
 trainer = pl.Trainer(gpus=yaml_data['train']['gpus'], max_epochs=yaml_data['train']['epochs'])  
-trainer.fit(classifier, train_loader, val_loader)  
+trainer.fit(classifier, train_loader, val_loader)
+
+trainer.test()
 
