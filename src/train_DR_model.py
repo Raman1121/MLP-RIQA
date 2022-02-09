@@ -1,4 +1,5 @@
 import torch
+import os
 from dataset import retinopathy_dataset
 from model import retinopathy_model
 
@@ -28,7 +29,7 @@ if(yaml_data['train']['verbose']):
     pprint(yaml_data)
     print('\n')
 
-wandb_logger = WandbLogger()
+wandb_logger = WandbLogger(log_model=True)
 
 train_transform = T.Compose([
     T.ToPILImage(),
@@ -58,7 +59,7 @@ train_dataset = retinopathy_dataset.RetinopathyDataset(df=train_df, categorical_
                                                 cat_labels_to_include=yaml_data['train']['cat_labels'], transforms=train_transform)
 
 val_dataset = retinopathy_dataset.RetinopathyDataset(df=val_df, categorical_partitition=True,
-                                                cat_labels_to_include=yaml_data['train']['cat_labels'], transforms=train_transform)
+                                                cat_labels_to_include=yaml_data['validation']['cat_labels'], transforms=train_transform)
 
 test_dataset = retinopathy_dataset.RetinopathyDataset(df=test_df, categorical_partitition=True,
                                                 cat_labels_to_include=yaml_data['test']['cat_labels'], transforms=train_transform)
@@ -74,7 +75,8 @@ print("Length of Test dataset: ", test_dataset.__len__())
 val_loader = DataLoader(val_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
 test_loader = DataLoader(test_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
 
-dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset, test_dataset, yaml_data['train']['batch_size'])
+#dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset, test_dataset, yaml_data['train']['batch_size'])
+dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, yaml_data['train']['batch_size'])
 
 
 classifier = retinopathy_model.RetinopathyClassificationModel(encoder=yaml_data['model']['encoder'], pretrained=True, 
@@ -82,7 +84,8 @@ classifier = retinopathy_model.RetinopathyClassificationModel(encoder=yaml_data[
                                                             learning_rate=yaml_data['train']['lr'])
 
 trainer = pl.Trainer(gpus=yaml_data['train']['gpus'], max_epochs=yaml_data['train']['epochs'], 
-                     logger=wandb_logger)  
+                     logger=wandb_logger, 
+                     default_root_dir=os.path.join(yaml_data['save_model']['directory'], yaml_data['save_model']['experiment']))  
 
 trainer.fit(classifier, dm)
 
