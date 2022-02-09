@@ -63,16 +63,19 @@ test_dataset = retinopathy_dataset.RetinopathyDataset(df=test_df, categorical_pa
                                                 cat_labels_to_include=yaml_data['train']['cat_labels'], transforms=train_transform)
 
 #Creating Dataloaders
-train_loader = DataLoader(train_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=True, num_workers=12)
-val_loader = DataLoader(val_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
-test_loader = DataLoader(test_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
+# train_loader = DataLoader(train_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=True, num_workers=12)
+# val_loader = DataLoader(val_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
+# test_loader = DataLoader(test_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
+
+dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset, test_dataset, yaml_data['train']['batch_size'])
 
 
 classifier = retinopathy_model.RetinopathyClassificationModel(encoder=yaml_data['model']['encoder'], pretrained=True, 
                                                             num_classes=yaml_data['train']['num_classes'], lr=yaml_data['train']['lr'])
 
 trainer = pl.Trainer(gpus=yaml_data['train']['gpus'], max_epochs=yaml_data['train']['epochs'])  
-trainer.fit(classifier, train_loader, val_loader)
+#trainer.fit(classifier, train_loader, val_loader)
+trainer.fit(classifier, dm)
 
-trainer.test()
+trainer.test(dm)
 
