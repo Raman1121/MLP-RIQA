@@ -51,10 +51,7 @@ train_df, val_df = train_test_split(main_df, test_size=yaml_data['train']['valid
 train_df = train_df.reset_index(drop=True)
 val_df = val_df.reset_index(drop=True)
 
-print("Length of Main df: ", len(main_df))
-print("Length of Training df: ", len(train_df))
-print("Length of Validation df: ", len(val_df))
-print("Length of Test df: ", len(test_df))
+print("Length of Main dataset: ", len(main_df))
 
 #Creating Datasets
 train_dataset = retinopathy_dataset.RetinopathyDataset(df=train_df, categorical_partitition=True,
@@ -66,9 +63,15 @@ val_dataset = retinopathy_dataset.RetinopathyDataset(df=val_df, categorical_part
 test_dataset = retinopathy_dataset.RetinopathyDataset(df=test_df, categorical_partitition=True,
                                                 cat_labels_to_include=yaml_data['test']['cat_labels'], transforms=train_transform)
 
+
+
+print("Length of Training dataset: ", train_dataset.__len__())
+print("Length of Validation dataset: ", val_dataset.__len__())
+print("Length of Test dataset: ", test_dataset.__len__())
+
 #Creating Dataloaders
 # train_loader = DataLoader(train_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=True, num_workers=12)
-# val_loader = DataLoader(val_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
+val_loader = DataLoader(val_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
 test_loader = DataLoader(test_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=False, num_workers=12)
 
 dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset, test_dataset, yaml_data['train']['batch_size'])
@@ -83,5 +86,6 @@ trainer = pl.Trainer(gpus=yaml_data['train']['gpus'], max_epochs=yaml_data['trai
 
 trainer.fit(classifier, dm)
 
-trainer.test(classifier, dataloaders=test_loader)
+#Testing on the validation set
+trainer.test(classifier, dataloaders=val_loader)
 
