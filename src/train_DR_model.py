@@ -64,7 +64,7 @@ val_dataset = retinopathy_dataset.RetinopathyDataset(df=val_df, categorical_part
                                                 cat_labels_to_include=yaml_data['train']['cat_labels'], transforms=train_transform)
 
 test_dataset = retinopathy_dataset.RetinopathyDataset(df=test_df, categorical_partitition=True,
-                                                cat_labels_to_include=yaml_data['train']['cat_labels'], transforms=train_transform)
+                                                cat_labels_to_include=yaml_data['test']['cat_labels'], transforms=train_transform)
 
 #Creating Dataloaders
 # train_loader = DataLoader(train_dataset, batch_size=yaml_data['train']['batch_size'], shuffle=True, num_workers=12)
@@ -75,12 +75,13 @@ dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset,
 
 
 classifier = retinopathy_model.RetinopathyClassificationModel(encoder=yaml_data['model']['encoder'], pretrained=True, 
-                                                            num_classes=yaml_data['train']['num_classes'], lr=yaml_data['train']['lr'])
+                                                            num_classes=yaml_data['train']['num_classes'], 
+                                                            learning_rate=yaml_data['train']['lr'])
 
 trainer = pl.Trainer(gpus=yaml_data['train']['gpus'], max_epochs=yaml_data['train']['epochs'], 
                      logger=wandb_logger)  
 
 trainer.fit(classifier, dm)
 
-trainer.test(classifier, test_dataloaders=test_loader)
+trainer.test(classifier, dataloaders=test_loader)
 

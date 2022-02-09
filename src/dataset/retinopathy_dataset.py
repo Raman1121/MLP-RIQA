@@ -42,7 +42,8 @@ class RetinopathyDataset(Dataset):
             if(self.cat_labels == None):
                 raise AssertionError("Categorical labels should be provided when 'categorical partition' is set to True")
             else:
-                self.df = self.df[self.df['quality'].isin(self.cat_labels).reset_index(drop=True)]
+                #self.df = self.df[self.df['quality'].isin(self.cat_labels).reset_index(drop=True)]
+                self.df = self.df.loc[self.df['quality'].isin(self.cat_labels)].reset_index(drop=True)
 
         else:
             if(self.threshold == None):
