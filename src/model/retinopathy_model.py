@@ -11,13 +11,13 @@ import torchmetrics
 from torch.nn.functional import cross_entropy
 
 class RetinopathyClassificationModel(LightningModule):
-    def __init__(self, encoder='resnet50', pretrained=True, num_classes=5, lr=1e-3):
+    def __init__(self, encoder='resnet50', pretrained=True, num_classes=5, learning_rate=1e-3):
         super().__init__()
 
         self.encoder = encoder
         self.pretrained = pretrained
         self.num_classes = num_classes
-        self.lr = lr
+        self.learning_rate = learning_rate
         self.loss = nn.CrossEntropyLoss()
         
 
@@ -76,5 +76,6 @@ class RetinopathyClassificationModel(LightningModule):
 
     def configure_optimizers(self):
         
-        optimizer = Adam(self.model.fc.parameters(), lr=self.lr)
+        #optimizer = Adam(self.model.fc.parameters(), lr=(self.lr or self.learning_rate))
+        optimizer = Adam(self.model.fc.parameters(), lr=self.learning_rate)
         return optimizer

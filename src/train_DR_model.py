@@ -9,11 +9,14 @@ from torchvision import transforms as T
 import pandas as pd
 import matplotlib.pyplot as plt
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import WandbLogger
 
 from sklearn.model_selection import train_test_split
 
 import yaml
 from pprint import pprint
+
+
 
 # ==================================================================== #
 
@@ -25,6 +28,7 @@ if(yaml_data['train']['verbose']):
     pprint(yaml_data)
     print('\n')
 
+wandb_logger = WandbLogger()
 
 train_transform = T.Compose([
     T.ToPILImage(),
@@ -73,8 +77,9 @@ dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset,
 classifier = retinopathy_model.RetinopathyClassificationModel(encoder=yaml_data['model']['encoder'], pretrained=True, 
                                                             num_classes=yaml_data['train']['num_classes'], lr=yaml_data['train']['lr'])
 
-trainer = pl.Trainer(gpus=yaml_data['train']['gpus'], max_epochs=yaml_data['train']['epochs'])  
-#trainer.fit(classifier, train_loader, val_loader)
+trainer = pl.Trainer(gpus=yaml_data['train']['gpus'], max_epochs=yaml_data['train']['epochs'], 
+                     logger=wandb_logger)  
+
 trainer.fit(classifier, dm)
 
 trainer.test(classifier, test_dataloaders=test_loader)
