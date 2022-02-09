@@ -3,7 +3,7 @@ model:
 
 train:
   batch_size: 32 #Batch Size
-  epochs: 10  #Number of epochs
+  epochs: 1  #Number of epochs
   num_classes: 5  #Number of target classes
   train_df_path: '/home/raman/MLP-RIQA/Train_set_RIQA_DR_Labels.csv' #Path to read the training dataset file
   gpus: 1 #Number of GPUs
