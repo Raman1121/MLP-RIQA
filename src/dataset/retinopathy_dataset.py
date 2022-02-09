@@ -1,6 +1,8 @@
+from cgi import test
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms as T
 from torchvision.io import read_image
+import pytorch_lightning as pl
 
 import yaml
 
@@ -74,3 +76,23 @@ class RetinopathyDataset(Dataset):
             image = self.transforms(image)
 
         return image, label
+
+
+class LightningRetinopathyDataset(pl.LightningDataModule):
+    def __init__(self, train_dataset, val_dataset, test_dataset, batch_size=32):
+        super().__init__()
+
+        self.train_dataset = train_dataset
+        self.val_dataset = val_dataset
+        self.test_dataset = test_dataset
+        self.batch_size = batch_size
+
+    def train_dataloader(self):
+        return DataLoader(self.train_dataset, batch_size=self.batch_size)
+
+    def val_dataloader(self):
+        return DataLoader(self.val_dataset, batch_size=self.batch_size)
+
+    def test_dataloader(self):
+        return DataLoader(self.test_dataset, batch_size=self.batch_size)
+    
