@@ -49,7 +49,8 @@ class RetinopathyDataset(Dataset):
             if(self.threshold == None):
                 raise AssertionError("Threshold should be provided when 'categorical_partitition' is false.")
                 
-            self.df = self.df[self.df['score']>=self.threshold].reset_index(drop=True)
+            #self.df = self.df[self.df['score']>=self.threshold].reset_index(drop=True)
+            self.df = self.df.loc[self.df['score'] >= self.threshold].reset_index(drop=True)
 
     def __len__(self):
         """
