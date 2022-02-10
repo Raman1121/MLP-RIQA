@@ -48,6 +48,7 @@ val_df = val_df.reset_index(drop=True)
 
 good_df = main_df.loc[main_df['quality']=='Good'].reset_index(drop=True)
 good_df['image'] = good_df['image'].apply(lambda x: str(yaml_data['dataset']['root_path']+'final_train/train/'+x))
+val_df['image'] = val_df['image'].apply(lambda x: str(yaml_data['dataset']['root_path']+'final_train/train/'+x))
 aug_df['image'] = aug_df['image'].apply(lambda x: str(yaml_data['dataset']['root_path']+'augmented_data/'+x))
 
 #Concat good_df and aug_df
