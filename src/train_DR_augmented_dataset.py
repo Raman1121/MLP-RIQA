@@ -29,8 +29,13 @@ if(yaml_data['train']['verbose']):
     pprint(yaml_data)
     print('\n')
 
-wandb_logger = WandbLogger(log_model=True)
-
+if(yaml_data['wandb']['run_name'] != ''):
+    #If name is provided, initialize the logger with a name
+    wandb_logger = WandbLogger(name = yaml_data['wandb']['run_name'], log_model=True)
+else:
+    #Else, initialize without a name
+    wandb_logger = WandbLogger(log_model=True)
+    
 train_transform = T.Compose([
     T.ToPILImage(),
     T.Resize((224,224)),
