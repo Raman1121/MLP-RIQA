@@ -76,6 +76,5 @@ class RetinopathyClassificationModel(LightningModule):
 
     def configure_optimizers(self):
         
-        #optimizer = Adam(self.model.fc.parameters(), lr=(self.lr or self.learning_rate))
         optimizer = Adam(self.model.fc.parameters(), lr=self.learning_rate)
         return optimizer

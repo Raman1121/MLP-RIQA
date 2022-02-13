@@ -8,13 +8,15 @@ train:
   train_df_path: '/home/raman/MLP-RIQA/Train_set_RIQA_DR_Labels.csv' #Path to read the training dataset file
   aug_df_path: '/home/raman/MLP-RIQA/Augmented_train_set.csv' #Path to read augmented training dataset file
   gpus: 1 #Number of GPUs
-  cat_labels: ['Good', 'Usable']  #Categorical Quality labels to include in the training set
+  cat_labels: ['Good']  #Categorical Quality labels to include in the training set
   lr: 0.001 #Learning Rate
   validation_split: 0.3 #Partition for validation data
   seed: 42
   verbose: True #To print all configurations while running the script
+  auto_lr_find: True #Find LR automatically using LR Rate finder 
 
 validation:
+  run_validation: False
   cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the valdation set
 
 test:
@@ -27,6 +29,7 @@ dataset:
   RIQA_test_labels: '/home/raman/MLP-RIQA/Annotated RIQA Labels files/test_set_result'  #Path to RIQA labels of test set
 
 save_model:
+  log_model: False
   directory: '../saved_models/'
   experiment: 'Good_Augmented_Images'
 
