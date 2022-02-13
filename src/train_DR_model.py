@@ -14,6 +14,10 @@ import matplotlib.pyplot as plt
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
+from pytorch_lightning.callbacks import RichProgressBar
+from pl_bolts.callbacks import PrintTableMetricsCallback
+
+
 
 from sklearn.model_selection import train_test_split
 
@@ -162,7 +166,10 @@ classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, p
                                                             num_classes=NUM_CLASSES
                                                             )
 cb_early_stopping = EarlyStopping(monitor='train_loss', patience=5, mode='min')
-callbacks = [cb_early_stopping]
+cb_rich_progressbar = RichProgressBar()
+cb_print_table_metrics = PrintTableMetricsCallback()
+
+callbacks = [cb_early_stopping, cb_rich_progressbar, cb_print_table_metrics]
 
 if(LOG_MODEL):
 
@@ -172,7 +179,7 @@ if(LOG_MODEL):
                         logger=wandb_logger,
                         default_root_dir=os.path.join(SAVE_DIR, EXPERIMENT_NAME),
                         auto_lr_find=AUTO_LR_FIND,
-                        callbacks=[cb_early_stopping])
+                        callbacks=callbacks)
 else:
 
     #Skip providing a deault_root_dir to save the model in case model logging is False
@@ -180,7 +187,7 @@ else:
                         max_epochs=EPOCHS, 
                         logger=wandb_logger,
                         auto_lr_find=AUTO_LR_FIND,
-                        callbacks=[cb_early_stopping])
+                        callbacks=callbacks)
                         
 
 #Finding the optimal learning rate for model training
