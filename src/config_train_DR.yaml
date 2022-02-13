@@ -3,7 +3,7 @@ model:
 
 train:
   batch_size: 32 #Batch Size
-  epochs: 1  #Number of epochs
+  epochs: 10  #Number of epochs
   num_classes: 5  #Number of target classes
   train_df_path: '/home/raman/MLP-RIQA/Train_set_RIQA_DR_Labels.csv' #Path to read the training dataset file
   aug_df_path: '/home/raman/MLP-RIQA/Augmented_train_set.csv' #Path to read augmented training dataset file
@@ -16,7 +16,7 @@ train:
   auto_lr_find: True #Find LR automatically using LR Rate finder 
 
 validation:
-  run_validation: False
+  run_validation: True
   cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the valdation set
 
 test:
