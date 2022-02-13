@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 from sklearn.model_selection import train_test_split
 from PIL import Image
@@ -151,6 +152,9 @@ classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, p
                                                             num_classes=NUM_CLASSES
                                                             )
 
+cb_early_stopping = EarlyStopping(monitor='train_loss', patience=5, mode='min')
+callbacks = [cb_early_stopping]
+
 if(LOG_MODEL):
 
     #Provide a deault_root_dir to save the model in case model logging is True
@@ -158,15 +162,17 @@ if(LOG_MODEL):
                         max_epochs=EPOCHS, 
                         logger=wandb_logger,
                         default_root_dir=os.path.join(SAVE_DIR, EXPERIMENT_NAME),
-                        auto_lr_find=AUTO_LR_FIND)
+                        auto_lr_find=AUTO_LR_FIND,
+                        callbacks=[cb_early_stopping])
 else:
 
     #Skip providing a deault_root_dir to save the model in case model logging is False
     trainer = pl.Trainer(gpus=GPUS, 
                         max_epochs=EPOCHS, 
                         logger=wandb_logger,
-                        auto_lr_find=AUTO_LR_FIND
-                        )
+                        auto_lr_find=AUTO_LR_FIND,
+                        callbacks=[cb_early_stopping])
+                        
 
 #Finding the optimal learning rate for model training
 if(AUTO_LR_FIND):
