@@ -92,6 +92,7 @@ if(VERBOSE):
     pprint(yaml_data)
     print('\n')
 
+'''
 if(RUN_NAME != ''):
     #If name is provided, initialize the logger with a name
     wandb_logger = WandbLogger(name = RUN_NAME, log_model=LOG_MODEL,
@@ -100,6 +101,8 @@ else:
     #Else, initialize without a name
     wandb_logger = WandbLogger(log_model=LOG_MODEL,
                                save_dir = os.path.join(SAVE_DIR, EXPERIMENT_NAME))
+'''
+wandb_logger = False
 
 if(EXPERIMENTAL_RUN):
     '''
