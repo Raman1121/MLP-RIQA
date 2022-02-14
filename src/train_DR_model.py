@@ -62,6 +62,7 @@ LR = yaml_data['train']['lr']
 VALIDATION_SPLIT = yaml_data['train']['validation_split']
 SEED = yaml_data['train']['seed']
 AUTO_LR_FIND = yaml_data['train']['auto_lr_find']
+LR_SCHEDULING = yaml_data['train']['lr_scheduling']
 
 #VALIDATION CONSTANTS
 RUN_VALIDATION = yaml_data['validation']['run_validation']
@@ -163,7 +164,7 @@ dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, BATCH_SIZE)
 
 
 classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, pretrained=True, 
-                                                            num_classes=NUM_CLASSES
+                                                            num_classes=NUM_CLASSES, lr_scheduler=LR_SCHEDULING
                                                             )
 cb_early_stopping = EarlyStopping(monitor='train_loss', patience=5, mode='min')
 cb_rich_progressbar = RichProgressBar()

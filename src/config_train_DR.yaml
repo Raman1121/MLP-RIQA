@@ -14,6 +14,7 @@ train:
   seed: 42
   verbose: True #To print all configurations while running the script
   auto_lr_find: True #Find LR automatically using LR Rate finder 
+  lr_scheduling: 'cosine' #LR Scheduling strategy to be used. Currently implemented ['None', 'cyclic', 'cosine', 'reduce_plateau']
 
 validation:
   run_validation: True
