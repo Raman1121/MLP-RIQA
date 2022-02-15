@@ -3,4 +3,3 @@ lightning_logs/
 wandb/
 src/MLP-RIQA-src/
 src/checkpoints
-saved_models/
