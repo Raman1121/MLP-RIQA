@@ -25,7 +25,7 @@ class RetinopathyDataset(Dataset):
                 The quality threshold below images would be discarded from the training set.
             categorical_partition : bool, default: True
                 A variable to denote if RIQA labels are categorical in nature.
-            cat_labels_to_include : list, default: ['Good', 'Usable', 'Bad']
+            cat_labels_to_include : list, default: ['Good', 'Usable', 'Reject']
                 A list of categorical labels to be included in our dataset
         """
 
