@@ -171,9 +171,9 @@ classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, p
                                                             )
 cb_early_stopping = EarlyStopping(monitor='train_loss', patience=5, mode='min')
 cb_rich_progressbar = RichProgressBar()
-cb_print_table_metrics = PrintTableMetricsCallback()
+#cb_print_table_metrics = PrintTableMetricsCallback()
 
-callbacks = [cb_early_stopping, cb_rich_progressbar, cb_print_table_metrics]
+callbacks = [cb_early_stopping, cb_rich_progressbar]
 
 if(LOG_MODEL):
 
