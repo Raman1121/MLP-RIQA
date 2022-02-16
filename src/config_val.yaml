@@ -1,0 +1,21 @@
+checkpoint_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/saved_models/Resnet50_Good_Reject/checkpoints/epoch=99-step=49099.ckpt'
+dataset:
+    root_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/data/diabetic-retinopathy-detection/' 
+    train_df_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/Train_set_RIQA_DR_Labels.csv'
+    test_df_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/Test_set_RIQA_DR_Labels.csv'
+encoder: 'resnet50'
+num_classes: 5
+seed: 42
+batch_size: 32
+gpus: 1
+
+training:
+    cat_labels: ['Good', 'Usable', 'Reject']
+testing:
+    cat_labels: ['Good', 'Usable', 'Reject']
+validation:
+    cat_labels: ['Good', 'Usable', 'Reject']
+
+run_evaluation_on: 'validation' #Options: ['train', 'validation', 'test']
+checkpoint_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/saved_models/Resnet50_Good_Usable_Reject/checkpoints/epoch=99-step=76899.ckpt'
+

@@ -147,7 +147,7 @@ train_dataset = retinopathy_dataset.RetinopathyDataset(df=concat_df, categorical
 val_dataset = retinopathy_dataset.RetinopathyDataset(df=val_df, categorical_partitition=True,
                                                 cat_labels_to_include=VAL_CAT_LABELS, transforms=train_transform)
 
-
+print("Length of Concat df: ", len(concat_df))
 print("Length of Training dataset: ", train_dataset.__len__())
 print("Length of Validation dataset: ", val_dataset.__len__())
 
@@ -162,9 +162,10 @@ classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, p
 
 cb_early_stopping = EarlyStopping(monitor='train_loss', patience=5, mode='min')
 cb_rich_progressbar = RichProgressBar()
-cb_print_table_metrics = PrintTableMetricsCallback()
+#cb_print_table_metrics = PrintTableMetricsCallback()
 
-callbacks = [cb_early_stopping, cb_rich_progressbar, cb_print_table_metrics]
+#callbacks = [cb_early_stopping, cb_rich_progressbar, cb_print_table_metrics]
+callbacks = [cb_early_stopping, cb_rich_progressbar]
 
 if(LOG_MODEL):
 
