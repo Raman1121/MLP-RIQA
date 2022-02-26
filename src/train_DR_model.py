@@ -50,6 +50,9 @@ VERBOSE = yaml_data['train']['verbose']
 
 #MODEL CONSTANTS
 ENCODER = yaml_data['model']['encoder']
+PRETRAIED = yaml_data['model']['pretrained']
+TRAIN_ALL_LAYERS = yaml_data['model']['train_all_layers']
+DO_FINETUNE = yaml_data['model']['do_finetune']
 
 #TRAINING CONSTANTS
 BATCH_SIZE = yaml_data['train']['batch_size']
@@ -166,9 +169,9 @@ dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset,
 
 
 classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, pretrained=True, 
-                                                            num_classes=NUM_CLASSES, lr_scheduler=LR_SCHEDULING
-                                                            )
-cb_early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
+                                                            num_classes=NUM_CLASSES, lr_scheduler=LR_SCHEDULING,
+                                                            train_all_layers=TRAIN_ALL_LAYERS)
+cb_early_stopping = EarlyStopping(monitor='val_loss', patience=15, mode='min')
 cb_rich_progressbar = RichProgressBar()
 #cb_print_table_metrics = PrintTableMetricsCallback()
 

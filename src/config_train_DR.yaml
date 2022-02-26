@@ -1,5 +1,8 @@
 model:
   encoder: 'resnet50' #Encoder Model
+  pretrained: True   #Use pretrained ImageNet weights   
+  train_all_layers: True  #To train all layers of the model 
+  do_finetune: True       #Perform finetune 
 
 train:
   batch_size: 32 #Batch Size
@@ -14,7 +17,7 @@ train:
   seed: 42
   verbose: True #To print all configurations while running the script
   auto_lr_find: True #Find LR automatically using LR Rate finder 
-  lr_scheduling: 'none' #LR Scheduling strategy to be used. Currently implemented ['None', 'cyclic', 'cosine', 'reduce_plateau']
+  lr_scheduling: 'reduce_plateau' #LR Scheduling strategy to be used. Currently implemented ['None', 'cyclic', 'cosine', 'reduce_plateau']
 
 validation:
   cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the valdation set
@@ -32,7 +35,7 @@ dataset:
 save_model:
   log_model: True
   directory: '../saved_models2/'
-  experiment: 'Resnet50_Good_Usable_Reject'
+  experiment: 'Finetune_Resnet50_Good_Usable_Reject'
 
 wandb:
   run_name: 'test-run1'

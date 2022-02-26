@@ -10,9 +10,10 @@ from dataset import retinopathy_dataset
 from pytorch_lightning.core.lightning import LightningModule
 import torchmetrics
 from torch.nn.functional import cross_entropy
+import warnings
 
 class RetinopathyClassificationModel(LightningModule):
-    def __init__(self, encoder='resnet50', pretrained=True, num_classes=5, learning_rate=1e-3, lr_scheduler='cyclic'):
+    def __init__(self, encoder='resnet50', pretrained=True, num_classes=5, learning_rate=1e-3, lr_scheduler='cyclic', train_all_layers=False, do_finetune=False):
         super().__init__()
 
         self.encoder = encoder
@@ -22,18 +23,29 @@ class RetinopathyClassificationModel(LightningModule):
         self.loss = nn.CrossEntropyLoss()
         self.lr_scheduler = lr_scheduler
 
+	if(do_finetune):
+	    train_all_layers = True
+	    self.pretrained = True
+
         if(self.encoder == 'resnet50'):
-            self.model = models.resnet50(pretrained=self.pretrained)
+            self.backbone = models.resnet50(pretrained=self.pretrained)
 
         elif(self.encoder == 'resnet18'):
-            self.model = models.resnet18(pretrained=self.pretrained)
+            self.backbone = models.resnet18(pretrained=self.pretrained)
         
-        #Freezing the model layers
-        for param in self.model.parameters():
-            param.requires_grad = False
+        if(not train_all_layers):
+
+            #Freezing the model layers
+            for param in self.backbone.parameters():
+                param.requires_grad = False
+        
+        if(train_all_layers):
+            if(pretrained):
+                print("Model is in fine-tuning mode. [Using ImageNet weights and training all layers]")
 
         #Attaching a new classification layer on the top of the model
-        self.model.fc = torch.nn.Linear(self.model.fc.in_features, self.num_classes)
+        self.backbone.fc = torch.nn.Linear(self.backbone.fc.in_features, self.num_classes)
+        self.model = self.backbone
         
     def training_step(self, batch, batch_idx):
         
@@ -77,7 +89,8 @@ class RetinopathyClassificationModel(LightningModule):
 
     def configure_optimizers(self):
         
-        optimizer = Adam(self.model.fc.parameters(), lr=self.learning_rate)
+        #optimizer = Adam(self.model.fc.parameters(), lr=self.learning_rate)
+        optimizer = Adam(self.model.parameters(), lr=self.learning_rate)
 
         if(self.lr_scheduler == 'none'):
             return optimizer
@@ -86,7 +99,7 @@ class RetinopathyClassificationModel(LightningModule):
         elif(self.lr_scheduler == 'cosine'):
             scheduler = CosineAnnealingLR(optimizer, T_max=1000, verbose=True)
         elif(self.lr_scheduler == 'reduce_plateau'):
-            scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, min_lr=1e-6, verbose=True)
+            scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, min_lr=1e-6, patience=5, verbose=True)
 
         return {"optimizer": optimizer, 
                 "lr_scheduler":{
