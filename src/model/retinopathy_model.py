@@ -11,8 +11,12 @@ from pytorch_lightning.core.lightning import LightningModule
 import torchmetrics
 from torch.nn.functional import cross_entropy
 
+from torchsummary import summary
+import warnings
+
 class RetinopathyClassificationModel(LightningModule):
-    def __init__(self, encoder='resnet50', pretrained=True, num_classes=5, learning_rate=1e-3, lr_scheduler='cyclic'):
+    def __init__(self, encoder='resnet50', pretrained=True, num_classes=5, learning_rate=1e-3, 
+                 lr_scheduler='cyclic', train_all_layers=False):
         super().__init__()
 
         self.encoder = encoder
@@ -22,18 +26,36 @@ class RetinopathyClassificationModel(LightningModule):
         self.loss = nn.CrossEntropyLoss()
         self.lr_scheduler = lr_scheduler
 
+        self.fc1_features = 512
+
         if(self.encoder == 'resnet50'):
-            self.model = models.resnet50(pretrained=self.pretrained)
+            self.backbone = models.resnet50(pretrained=self.pretrained)
 
         elif(self.encoder == 'resnet18'):
-            self.model = models.resnet18(pretrained=self.pretrained)
+            self.backbone = models.resnet18(pretrained=self.pretrained)
         
-        #Freezing the model layers
-        for param in self.model.parameters():
-            param.requires_grad = False
+        if(not train_all_layers):
 
-        #Attaching a new classification layer on the top of the model
-        self.model.fc = torch.nn.Linear(self.model.fc.in_features, self.num_classes)
+            #Freezing the model layers
+            for param in self.backbone.parameters():
+                param.requires_grad = False
+
+        if(train_all_layers):
+            if(self.pretrained):
+                warnings.warn("Training all layers when using pretrained weights. Maybe you should check your code and set 'pretrained'=False")
+
+        self.backbone.fc = torch.nn.Linear(self.backbone.fc.in_features, self.num_classes)
+        self.model = self.backbone
+
+        #Creating my module to add on top of the backbone.
+        #Attaching 2 new classification layers on the top of the model
+
+        # self.mymodule = nn.Sequential(
+        #                     nn.Linear(self.backbone.fc.in_features, self.fc1_features),
+        #                     nn.Linear(self.fc1_features, self.num_classes)
+        # )
+
+        # self.model = nn.Sequential(self.backbone, self.mymodule)
         
     def training_step(self, batch, batch_idx):
         
@@ -77,7 +99,8 @@ class RetinopathyClassificationModel(LightningModule):
 
     def configure_optimizers(self):
         
-        optimizer = Adam(self.model.fc.parameters(), lr=self.learning_rate)
+        #optimizer = Adam(self.model.fc.parameters(), lr=self.learning_rate)
+        optimizer = Adam(self.model.parameters(), lr=self.learning_rate)
 
         if(self.lr_scheduler == 'none'):
             return optimizer

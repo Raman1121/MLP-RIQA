@@ -1,5 +1,7 @@
 model:
   encoder: 'resnet18' #Encoder Model
+  pretrained: True
+  train_all_layers: False #To train all layers of the model
 
 train:
   batch_size: 32 #Batch Size
