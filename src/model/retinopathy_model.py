@@ -16,7 +16,7 @@ import warnings
 
 class RetinopathyClassificationModel(LightningModule):
     def __init__(self, encoder='resnet50', pretrained=True, num_classes=5, learning_rate=1e-3, 
-                 lr_scheduler='cyclic', train_all_layers=False):
+                 lr_scheduler='cyclic', train_all_layers=False, do_finetune=False):
         super().__init__()
 
         self.encoder = encoder
@@ -28,11 +28,17 @@ class RetinopathyClassificationModel(LightningModule):
 
         self.fc1_features = 512
 
+        if(do_finetune):
+            #Finetuning requires updating the whole model with pretrained weights.
+            train_all_layers = True
+            self.pretrained = True
+
         if(self.encoder == 'resnet50'):
             self.backbone = models.resnet50(pretrained=self.pretrained)
 
         elif(self.encoder == 'resnet18'):
             self.backbone = models.resnet18(pretrained=self.pretrained)
+
         
         if(not train_all_layers):
 
@@ -40,9 +46,7 @@ class RetinopathyClassificationModel(LightningModule):
             for param in self.backbone.parameters():
                 param.requires_grad = False
 
-        if(train_all_layers):
-            if(self.pretrained):
-                warnings.warn("Training all layers when using pretrained weights. Maybe you should check your code and set 'pretrained'=False")
+        
 
         self.backbone.fc = torch.nn.Linear(self.backbone.fc.in_features, self.num_classes)
         self.model = self.backbone

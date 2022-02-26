@@ -17,8 +17,6 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.callbacks import RichProgressBar
 from pl_bolts.callbacks import PrintTableMetricsCallback
 
-
-
 from sklearn.model_selection import train_test_split
 
 import yaml
@@ -52,6 +50,7 @@ VERBOSE = yaml_data['train']['verbose']
 ENCODER = yaml_data['model']['encoder']
 PRETRAINED = yaml_data['model']['pretrained']
 TRAIN_ALL_LAYERS = yaml_data['model']['train_all_layers']
+DO_FINETUNE = yaml_data['model']['do_finetune']
 
 #TRAINING CONSTANTS
 BATCH_SIZE = yaml_data['train']['batch_size']
@@ -172,7 +171,7 @@ dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset,
 
 classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, pretrained=PRETRAINED, 
                                                             num_classes=NUM_CLASSES, lr_scheduler=LR_SCHEDULING, 
-                                                            train_all_layers=TRAIN_ALL_LAYERS)
+                                                            train_all_layers=TRAIN_ALL_LAYERS, do_finetune=DO_FINETUNE)
                                                             
 cb_early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 cb_rich_progressbar = RichProgressBar()
