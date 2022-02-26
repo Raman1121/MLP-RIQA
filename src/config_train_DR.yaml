@@ -3,25 +3,25 @@ model:
 
 train:
   batch_size: 32 #Batch Size
-  epochs: 10  #Number of epochs
+  epochs: 1  #Number of epochs
   num_classes: 5  #Number of target classes
   train_df_path: '/home/raman/MLP-RIQA/Train_set_RIQA_DR_Labels.csv' #Path to read the training dataset file
   aug_df_path: '/home/raman/MLP-RIQA/Augmented_train_set.csv' #Path to read augmented training dataset file
   gpus: 1 #Number of GPUs
-  cat_labels: ['Good']  #Categorical Quality labels to include in the training set. Options: ['Good', 'Usable', 'Reject']
+  cat_labels: ['Reject']  #Categorical Quality labels to include in the training set. Options: ['Good', 'Usable', 'Reject']
   lr: 0.001 #Learning Rate
   validation_split: 0.3 #Partition for validation data
   seed: 42
   verbose: True #To print all configurations while running the script
   auto_lr_find: True #Find LR automatically using LR Rate finder 
-  lr_scheduling: 'cosine' #LR Scheduling strategy to be used. Currently implemented ['None', 'cyclic', 'cosine', 'reduce_plateau']
+  lr_scheduling: 'none' #LR Scheduling strategy to be used. Currently implemented ['none', 'cyclic', 'cosine', 'reduce_plateau']
 
 validation:
-  run_validation: True
   cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the valdation set
 
 test:
-  test_df_path: '/home/raman/rds/hpc-work/MLP-RIQA/Test_set_RIQA_DR_Labels.csv' #Path to read the test dataset file
+  run_eval_on: 'test'  #Run evaluation on which dataset. Options: ['validation', 'test']
+  test_df_path: '/home/raman/MLP-RIQA/Test_set_RIQA_DR_Labels.csv' #Path to read the test dataset file
   cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the test set
 
 dataset:
@@ -32,7 +32,7 @@ dataset:
 save_model:
   log_model: False
   directory: '../saved_models/'
-  experiment: 'Good_Augmented_Images'
+  experiment: 'Model_Saving'
 
 wandb:
   run_name: 'test-run1'

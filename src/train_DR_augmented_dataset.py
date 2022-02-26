@@ -139,6 +139,8 @@ aug_df['image'] = aug_df['image'].apply(lambda x: str(DATASET_ROOT_PATH+'augment
 #Concat good_df and aug_df
 concat_df = pd.concat([good_df, aug_df], axis=0)
 
+print("Length of concat df: ", len(concat_df))
+
 #Train dataset consists of both original 'Good' and Augmented 'Good' images
 train_dataset = retinopathy_dataset.RetinopathyDataset(df=concat_df, categorical_partitition=True,
                                                 cat_labels_to_include=TRAIN_CAT_LABELS, transforms=train_transform)

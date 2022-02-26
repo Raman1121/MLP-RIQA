@@ -65,12 +65,13 @@ AUTO_LR_FIND = yaml_data['train']['auto_lr_find']
 LR_SCHEDULING = yaml_data['train']['lr_scheduling']
 
 #VALIDATION CONSTANTS
-RUN_VALIDATION = yaml_data['validation']['run_validation']
+#RUN_VALIDATION = yaml_data['validation']['run_validation']
 VAL_CAT_LABELS = yaml_data['validation']['cat_labels']
 
 #TEST CONSTANTS
 TEST_DF_PATH = yaml_data['test']['test_df_path']
 TEST_CAT_LABELS = yaml_data['test']['cat_labels']
+RUN_EVAL_ON = yaml_data['test']['run_eval_on']
 
 #DATASET CONSTANTS
 DATASET_ROOT_PATH = yaml_data['dataset']['root_path']
@@ -163,17 +164,18 @@ val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_w
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=12)
 
 #dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset, test_dataset, yaml_data['train']['batch_size'])
-dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, BATCH_SIZE)
+dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset,
+                                                     test_dataset, BATCH_SIZE)
 
 
 classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, pretrained=True, 
-                                                            num_classes=NUM_CLASSES, lr_scheduler=LR_SCHEDULING
-                                                            )
-cb_early_stopping = EarlyStopping(monitor='train_loss', patience=5, mode='min')
+                                                            num_classes=NUM_CLASSES, lr_scheduler=LR_SCHEDULING)
+                                                            
+cb_early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 cb_rich_progressbar = RichProgressBar()
-cb_print_table_metrics = PrintTableMetricsCallback()
+#cb_print_table_metrics = PrintTableMetricsCallback()
 
-callbacks = [cb_early_stopping, cb_rich_progressbar, cb_print_table_metrics]
+callbacks = [cb_early_stopping, cb_rich_progressbar]
 
 if(LOG_MODEL):
 
@@ -207,8 +209,13 @@ else:
 
 
 trainer.fit(classifier, dm)
+torch.save(classifier, os.path.join(SAVE_DIR, EXPERIMENT_NAME))
 
-#Testing on the validation set
-if(RUN_VALIDATION):
+#Testing
+# if(RUN_VALIDATION):
+#     trainer.test(classifier, dataloaders=val_loader)
+
+if(RUN_EVAL_ON == 'test'):
+    trainer.test(classifier, dataloaders=test_loader)
+elif(RUN_EVAL_ON == 'validation'):
     trainer.test(classifier, dataloaders=val_loader)
-
