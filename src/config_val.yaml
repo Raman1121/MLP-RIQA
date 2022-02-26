@@ -1,4 +1,3 @@
-checkpoint_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/saved_models/Resnet50_Good_Reject/checkpoints/epoch=99-step=49099.ckpt'
 dataset:
     root_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/data/diabetic-retinopathy-detection/' 
     train_df_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/Train_set_RIQA_DR_Labels.csv'
@@ -16,6 +15,6 @@ testing:
 validation:
     cat_labels: ['Good', 'Usable', 'Reject']
 
-run_evaluation_on: 'validation' #Options: ['train', 'validation', 'test']
+run_evaluation_on: 'test' #Options: ['train', 'validation', 'test']
 checkpoint_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/saved_models/Resnet50_Good_Usable_Reject/checkpoints/epoch=99-step=76899.ckpt'
 

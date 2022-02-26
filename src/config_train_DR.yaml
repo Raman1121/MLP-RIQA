@@ -8,7 +8,7 @@ train:
   train_df_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/Train_set_RIQA_DR_Labels.csv' #Path to read the training dataset file
   aug_df_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/Augmented_train_set.csv' #Path to read augmented training dataset file
   gpus: 1 #Number of GPUs
-  cat_labels: ['Good', 'Reject']  #Categorical Quality labels to include in the training set
+  cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the training set. Options: ['Good', 'Usable', 'Reject']
   lr: 0.001 #Learning Rate
   validation_split: 0.3 #Partition for validation data
   seed: 42
@@ -17,10 +17,10 @@ train:
   lr_scheduling: 'none' #LR Scheduling strategy to be used. Currently implemented ['None', 'cyclic', 'cosine', 'reduce_plateau']
 
 validation:
-  run_validation: True
   cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the valdation set
 
 test:
+  run_eval_on: 'test'  #Run evaluation on which dataset. Options: ['validation', 'test']
   test_df_path: '/home/co-dutt1/rds/hpc-work/MLP-RIQA/Test_set_RIQA_DR_Labels.csv' #Path to read the test dataset file
   cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the test set
 
@@ -31,8 +31,8 @@ dataset:
 
 save_model:
   log_model: True
-  directory: '../saved_models/'
-  experiment: 'Resnet50_Good_Augmented'
+  directory: '../saved_models2/'
+  experiment: 'Resnet50_Good_Usable_Reject'
 
 wandb:
   run_name: 'test-run1'

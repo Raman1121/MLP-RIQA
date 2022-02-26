@@ -81,20 +81,20 @@ class RetinopathyDataset(Dataset):
 
 
 class LightningRetinopathyDataset(pl.LightningDataModule):
-    def __init__(self, train_dataset, batch_size=32):
+    def __init__(self, train_dataset,val_dataset, test_dataset, batch_size=32):
         super().__init__()
 
         self.train_dataset = train_dataset
-        #self.val_dataset = val_dataset
-        #self.test_dataset = test_dataset
+        self.val_dataset = val_dataset
+        self.test_dataset = test_dataset
         self.batch_size = batch_size
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, num_workers=12)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, num_workers=12, shuffle=True)
 
-    # def val_dataloader(self):
-    #     return DataLoader(self.val_dataset, batch_size=self.batch_size, num_workers=12)
+    def val_dataloader(self):
+        return DataLoader(self.val_dataset, batch_size=self.batch_size, num_workers=12, shuffle=False)
 
-    # def test_dataloader(self):
-    #     return DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers=12)
+    def test_dataloader(self):
+        return DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers=12, shuffle=False)
     
