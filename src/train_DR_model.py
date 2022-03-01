@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from pytorch_lightning.callbacks import RichProgressBar
+from pytorch_lightning.callbacks import RichProgressBar, ModelCheckpoint
 from pl_bolts.callbacks import PrintTableMetricsCallback
 
 
@@ -173,9 +173,10 @@ classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, p
                                                             train_all_layers=TRAIN_ALL_LAYERS)
 cb_early_stopping = EarlyStopping(monitor='val_loss', patience=15, mode='min')
 cb_rich_progressbar = RichProgressBar()
+cb_model_checkpoint = ModelCheckpoint(dirpath=os.path.join(SAVE_DIR, EXPERIMENT_NAME), monitor='val_loss', save_weights_only=True)
 #cb_print_table_metrics = PrintTableMetricsCallback()
 
-callbacks = [cb_early_stopping, cb_rich_progressbar]
+callbacks = [cb_early_stopping, cb_rich_progressbar, cb_model_checkpoint]
 
 if(LOG_MODEL):
 
@@ -202,7 +203,7 @@ if(AUTO_LR_FIND):
     lr_finder = trainer.tuner.lr_find(classifier, dm)
     new_lr = lr_finder.suggestion()
     print("New suggested learning rate is: ", new_lr)
-    classifier.hparams.lr = new_lr
+    classifier.hparams.learning_rate = new_lr
 else:
     print("~~~~ Using the learning rate provided in the config file ~~~~~")
     classifier.hparams.lr = LR

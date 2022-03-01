@@ -23,9 +23,9 @@ class RetinopathyClassificationModel(LightningModule):
         self.loss = nn.CrossEntropyLoss()
         self.lr_scheduler = lr_scheduler
 
-	if(do_finetune):
-	    train_all_layers = True
-	    self.pretrained = True
+        if(do_finetune):
+            train_all_layers = True
+            self.pretrained = True
 
         if(self.encoder == 'resnet50'):
             self.backbone = models.resnet50(pretrained=self.pretrained)
@@ -56,8 +56,9 @@ class RetinopathyClassificationModel(LightningModule):
         #Training metrics
         preds = torch.argmax(logits, dim=1)
         acc = torchmetrics.functional.accuracy(preds, y)
-        self.log('train_loss', loss, on_step=True, on_epoch=True)
-        self.log('train_acc', acc, on_step=True, on_epoch=True)
+        self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('train_acc', acc, on_step=False, on_epoch=True, prog_bar=True)
+        #print("Training Loss: {} Training Accuracy: {}".format(loss, acc))
 
         return loss
 
@@ -69,8 +70,9 @@ class RetinopathyClassificationModel(LightningModule):
         #Validation metrics
         preds = torch.argmax(logits, dim=1)
         acc = torchmetrics.functional.accuracy(preds, y)
-        self.log('val_loss', loss, on_step=True, on_epoch=True)
-        self.log('val_acc', acc, on_step=True, on_epoch=True)
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('val_acc', acc, on_step=False, on_epoch=True, prog_bar=True)
+        #print("Validation Loss: {} Validation Accuracy: {}".format(loss, acc))
 
         return loss
 
@@ -82,8 +84,8 @@ class RetinopathyClassificationModel(LightningModule):
         #Validation metrics
         preds = torch.argmax(logits, dim=1)
         acc = torchmetrics.functional.accuracy(preds, y)
-        self.log('test_loss', loss, on_step=True, on_epoch=True)
-        self.log('test_acc', acc, on_step=True, on_epoch=True)
+        self.log('test_loss', loss, on_step=False, on_epoch=True)
+        self.log('test_acc', acc, on_step=False, on_epoch=True)
 
         return loss
 

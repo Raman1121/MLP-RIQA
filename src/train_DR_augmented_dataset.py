@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from pytorch_lightning.callbacks import RichProgressBar
+from pytorch_lightning.callbacks import RichProgressBar, ModelCheckpoint
 from pl_bolts.callbacks import PrintTableMetricsCallback
 from torch.optim.lr_scheduler import CyclicLR, CosineAnnealingLR, ReduceLROnPlateau
 
@@ -47,6 +47,9 @@ VERBOSE = yaml_data['train']['verbose']
 
 #MODEL CONSTANTS
 ENCODER = yaml_data['model']['encoder']
+PRETRAINED = yaml_data['model']['pretrained']
+TRAIN_ALL_LAYERS = yaml_data['model']['train_all_layers']
+DO_FINETUNE = yaml_data['model']['do_finetune']
 
 #TRAINING CONSTANTS
 BATCH_SIZE = yaml_data['train']['batch_size']
@@ -63,12 +66,13 @@ AUTO_LR_FIND = yaml_data['train']['auto_lr_find']
 LR_SCHEDULING = yaml_data['train']['lr_scheduling']
 
 #VALIDATION CONSTANTS
-RUN_VALIDATION = yaml_data['validation']['run_validation']
+#RUN_VALIDATION = yaml_data['validation']['run_validation']
 VAL_CAT_LABELS = yaml_data['validation']['cat_labels']
 
 #TEST CONSTANTS
 TEST_DF_PATH = yaml_data['test']['test_df_path']
 TEST_CAT_LABELS = yaml_data['test']['cat_labels']
+RUN_EVAL_ON = yaml_data['test']['run_eval_on']
 
 #DATASET CONSTANTS
 DATASET_ROOT_PATH = yaml_data['dataset']['root_path']
@@ -124,6 +128,7 @@ train_transform = T.Compose([
 
 main_df = pd.read_csv(TRAIN_DF_PATH)
 aug_df = pd.read_csv(AUG_DF_PATH)
+test_df = pd.read_csv(TEST_DF_PATH)
 
 #Creating validation df
 _, val_df = train_test_split(main_df, test_size=VALIDATION_SPLIT,
@@ -135,6 +140,7 @@ good_df = main_df.loc[main_df['quality']=='Good'].reset_index(drop=True)
 good_df['image'] = good_df['image'].apply(lambda x: str(DATASET_ROOT_PATH+'final_train/train/'+x))
 val_df['image'] = val_df['image'].apply(lambda x: str(DATASET_ROOT_PATH+'final_train/train/'+x))
 aug_df['image'] = aug_df['image'].apply(lambda x: str(DATASET_ROOT_PATH+'augmented_data/'+x))
+test_df['image'] = test_df['image'].apply(lambda x: str(DATASET_ROOT_PATH+'final_test/test/'+x))
 
 #Concat good_df and aug_df
 concat_df = pd.concat([good_df, aug_df], axis=0)
@@ -147,12 +153,17 @@ train_dataset = retinopathy_dataset.RetinopathyDataset(df=concat_df, categorical
 val_dataset = retinopathy_dataset.RetinopathyDataset(df=val_df, categorical_partitition=True,
                                                 cat_labels_to_include=VAL_CAT_LABELS, transforms=train_transform)
 
+test_dataset = retinopathy_dataset.RetinopathyDataset(df=test_df, categorical_partitition=True,
+                                                cat_labels_to_include=TEST_CAT_LABELS, transforms=train_transform)
+
 print("Length of Concat df: ", len(concat_df))
 print("Length of Training dataset: ", train_dataset.__len__())
 print("Length of Validation dataset: ", val_dataset.__len__())
+print("Length of Test dataset: ", test_dataset.__len__())
 
 #Creating DataLoader
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=12)
+test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=12)
 
 dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, BATCH_SIZE)
 
@@ -163,9 +174,10 @@ classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, p
 cb_early_stopping = EarlyStopping(monitor='train_loss', patience=5, mode='min')
 cb_rich_progressbar = RichProgressBar()
 #cb_print_table_metrics = PrintTableMetricsCallback()
+cb_model_checkpoint = ModelCheckpoint(dirpath=os.path.join(SAVE_DIR, EXPERIMENT_NAME), monitor='val_loss', save_weights_only=True)
 
 #callbacks = [cb_early_stopping, cb_rich_progressbar, cb_print_table_metrics]
-callbacks = [cb_early_stopping, cb_rich_progressbar]
+callbacks = [cb_early_stopping, cb_rich_progressbar, cb_model_checkpoint]
 
 if(LOG_MODEL):
 
@@ -199,6 +211,7 @@ else:
 
 trainer.fit(classifier, dm)
 
-#Testing on the validation set
-if(RUN_VALIDATION):
+if(RUN_EVAL_ON == 'test'):
+    trainer.test(classifier, dataloaders=test_loader)
+elif(RUN_EVAL_ON == 'validation'):
     trainer.test(classifier, dataloaders=val_loader)
