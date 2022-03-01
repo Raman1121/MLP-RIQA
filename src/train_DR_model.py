@@ -117,7 +117,6 @@ if(EXPERIMENTAL_RUN):
     RUN_NAME = ''
     EXPERIMENT_NAME = 'Experimental_Run'
     AUTO_LR_FIND = False
-    RUN_VALIDATION = False
     wandb_logger = False
 
 train_transform = T.Compose([
