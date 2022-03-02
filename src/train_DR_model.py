@@ -83,6 +83,7 @@ RIQA_TEST_LABELS = yaml_data['dataset']['RIQA_test_labels']
 LOG_MODEL = yaml_data['save_model']['log_model']
 SAVE_DIR = yaml_data['save_model']['directory']
 EXPERIMENT_NAME = yaml_data['save_model']['experiment']
+PLOTTING_DIR = yaml_data['save_model']['plotting_dir']
 
 #WANDB CONSTANTS
 RUN_NAME = yaml_data['wandb']['run_name']
@@ -170,8 +171,9 @@ dm = retinopathy_dataset.LightningRetinopathyDataset(train_dataset, val_dataset,
 
 classifier = retinopathy_model.RetinopathyClassificationModel(encoder=ENCODER, pretrained=PRETRAINED, 
                                                             num_classes=NUM_CLASSES, lr_scheduler=LR_SCHEDULING, 
-                                                            train_all_layers=TRAIN_ALL_LAYERS, do_finetune=DO_FINETUNE)
-                                                            
+                                                            train_all_layers=TRAIN_ALL_LAYERS, do_finetune=DO_FINETUNE,
+                                                            plot_save_dir=os.path.join(PLOTTING_DIR, EXPERIMENT_NAME))
+
 cb_early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 cb_rich_progressbar = RichProgressBar()
 #cb_print_table_metrics = PrintTableMetricsCallback()
@@ -203,18 +205,17 @@ if(AUTO_LR_FIND):
     lr_finder = trainer.tuner.lr_find(classifier, dm)
     new_lr = lr_finder.suggestion()
     print("New suggested learning rate is: ", new_lr)
-    classifier.hparams.lr = new_lr
+    classifier.hparams.learning_rate = new_lr
 else:
     print("~~~~ Using the learning rate provided in the config file ~~~~~")
-    classifier.hparams.lr = LR
+    classifier.hparams.learning_rate = LR
 
+print("############ MODEL PARAMETERS ###########")
+print(classifier.hparams)
 
 trainer.fit(classifier, dm)
 torch.save(classifier, os.path.join(SAVE_DIR, EXPERIMENT_NAME))
 
-#Testing
-# if(RUN_VALIDATION):
-#     trainer.test(classifier, dataloaders=val_loader)
 
 if(RUN_EVAL_ON == 'test'):
     trainer.test(classifier, dataloaders=test_loader)

@@ -206,14 +206,14 @@ if(AUTO_LR_FIND):
     lr_finder = trainer.tuner.lr_find(classifier, dm)
     new_lr = lr_finder.suggestion()
     print("New suggested learning rate is: ", new_lr)
-    classifier.hparams.lr = new_lr
+    classifier.hparams.learning_rate = new_lr
 else:
     print("~~~~ Using the learning rate provided in the config file ~~~~~")
-    classifier.hparams.lr = LR
+    classifier.hparams.learning_rate = LR
 
-trainer.fit(classifier, dm)
+#trainer.fit(classifier, dm)
 
-if(RUN_EVAL_ON == 'test'):
-    trainer.test(classifier, dataloaders=test_loader)
-elif(RUN_EVAL_ON == 'validation'):
-    trainer.test(classifier, dataloaders=val_loader)
+# if(RUN_EVAL_ON == 'test'):
+#     trainer.test(classifier, dataloaders=test_loader)
+# elif(RUN_EVAL_ON == 'validation'):
+#     trainer.test(classifier, dataloaders=val_loader)

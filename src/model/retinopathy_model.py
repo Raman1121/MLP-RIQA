@@ -1,4 +1,6 @@
 import torch
+import numpy as np
+import os
 from torch import nn
 import torch.nn.functional as F
 import torchvision.models as models
@@ -9,14 +11,21 @@ from dataset import retinopathy_dataset
 
 from pytorch_lightning.core.lightning import LightningModule
 import torchmetrics
+from torchmetrics import ConfusionMatrix
+from mlxtend.plotting import plot_confusion_matrix
 from torch.nn.functional import cross_entropy
 
 from torchsummary import summary
+import matplotlib.pyplot as plt
+
+from sklearn.metrics import confusion_matrix
 import warnings
+import itertools
+
 
 class RetinopathyClassificationModel(LightningModule):
     def __init__(self, encoder='resnet50', pretrained=True, num_classes=5, learning_rate=1e-3, 
-                 lr_scheduler='cyclic', train_all_layers=False, do_finetune=False):
+                 lr_scheduler='cyclic', train_all_layers=False, do_finetune=False, plot_save_dir=None):
         super().__init__()
 
         self.encoder = encoder
@@ -25,6 +34,10 @@ class RetinopathyClassificationModel(LightningModule):
         self.learning_rate = learning_rate
         self.loss = nn.CrossEntropyLoss()
         self.lr_scheduler = lr_scheduler
+        self.ground_truths = []
+        self.predictions = []
+        self.classes = ['Severity 0', 'Severity 1', 'Severity 2', 'Severity 3', 'Severity 4']
+        self.plot_save_dir = plot_save_dir
 
         self.fc1_features = 512
 
@@ -70,8 +83,9 @@ class RetinopathyClassificationModel(LightningModule):
         #Training metrics
         preds = torch.argmax(logits, dim=1)
         acc = torchmetrics.functional.accuracy(preds, y)
-        self.log('train_loss', loss, on_step=True, on_epoch=True)
-        self.log('train_acc', acc, on_step=True, on_epoch=True)
+        self.log('train_loss', loss, on_step=False, on_epoch=True)
+        self.log('train_acc', acc, on_step=False, on_epoch=True)
+        #print("Training Loss: {} Training Accuracy: {}".format(loss, acc))
 
         return loss
 
@@ -83,8 +97,9 @@ class RetinopathyClassificationModel(LightningModule):
         #Validation metrics
         preds = torch.argmax(logits, dim=1)
         acc = torchmetrics.functional.accuracy(preds, y)
-        self.log('val_loss', loss, on_step=True, on_epoch=True)
-        self.log('val_acc', acc, on_step=True, on_epoch=True)
+        self.log('val_loss', loss, on_step=False, on_epoch=True)
+        self.log('val_acc', acc, on_step=False, on_epoch=True)
+        #print("Validation Loss: {} Validation Accuracy: {}".format(loss, acc))
 
         return loss
 
@@ -99,7 +114,58 @@ class RetinopathyClassificationModel(LightningModule):
         self.log('test_loss', loss, on_step=True, on_epoch=True)
         self.log('test_acc', acc, on_step=True, on_epoch=True)
 
+        y_list = y.tolist()
+        preds_list = preds.tolist()
+
+        self.ground_truths.extend(y_list)
+        self.predictions.extend(preds_list)
+
+        # for i in range(len(y)):
+        #     self.ground_truths.append(y_list[i])
+        #     self.predictions.append(preds_list[i])
+        
         return loss
+
+    def plot_confusion_matrix(self, ground_truths, predictions, classes, 
+                              title='Confusion matrix', cmap=plt.cm.Blues, normalize=False, plot_save_dir=None):
+
+        print(" ######################## PLOTTING CM NOW ########################")
+        cm = confusion_matrix(ground_truths, predictions)
+
+        if normalize:
+            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+            print("Normalized confusion matrix")
+        else:
+            print('Confusion matrix, without normalization')
+        print(cm)
+        plt.imshow(cm, interpolation='nearest', cmap=cmap)
+        plt.title(title)
+        plt.colorbar()
+        tick_marks = np.arange(len(classes))
+        plt.xticks(tick_marks, classes, rotation=45)
+        plt.yticks(tick_marks, classes)
+
+        fmt = '.2f' if normalize else 'd'
+        thresh = cm.max() / 2.
+
+        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+            plt.text(j, i, format(cm[i, j], fmt), horizontalalignment="center", color="white" if cm[i, j] > thresh else "black")
+
+        plt.tight_layout()
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label')
+
+        try:
+            plt.savefig(os.path.join(plot_save_dir, 'Confusion_Matrix.png'))
+        except:
+            os.makedirs(plot_save_dir)
+            plt.savefig(os.path.join(plot_save_dir, 'Confusion_Matrix.png'))
+
+    def test_epoch_end(self, outputs):
+        
+        #Plot confusion matrix when testing ends
+        self.plot_confusion_matrix(ground_truths = self.ground_truths, predictions = self.predictions, 
+                              classes = self.classes, plot_save_dir=self.plot_save_dir)
 
     def configure_optimizers(self):
         
@@ -120,3 +186,5 @@ class RetinopathyClassificationModel(LightningModule):
                     "scheduler": scheduler,
                     "monitor": 'val_loss'
                 }}
+
+    

@@ -2,7 +2,7 @@ model:
   encoder: 'resnet18'     #Encoder Model
   pretrained: True        #Use ImageNet weights.
   train_all_layers: False #To train all layers of the model
-  do_finetune: True       #Perform finetune 
+  do_finetune: False      #Perform finetune 
 
 train:
   batch_size: 32          #Batch Size
@@ -20,10 +20,10 @@ train:
   lr_scheduling: 'none'   #LR Scheduling strategy to be used. Currently implemented ['none', 'cyclic', 'cosine', 'reduce_plateau']
 
 validation:
-  cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the valdation set
+  cat_labels: ['Reject']  #Categorical Quality labels to include in the valdation set
 
 test:
-  run_eval_on: 'test'                       #Run evaluation on which dataset. Options: ['validation', 'test']
+  run_eval_on: 'test'                 #Run evaluation on which dataset. Options: ['validation', 'test']
   test_df_path: '/home/raman/MLP-RIQA/Test_set_RIQA_DR_Labels.csv' #Path to read the test dataset file
   cat_labels: ['Good', 'Usable', 'Reject']  #Categorical Quality labels to include in the test set
 
@@ -36,6 +36,7 @@ save_model:
   log_model: False
   directory: '../saved_models/'
   experiment: 'Model_Saving'
+  plotting_dir: '../plots/'
 
 wandb:
   run_name: 'test-run1'
