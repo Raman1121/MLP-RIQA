@@ -1,3 +1,4 @@
+from turtle import title
 import torch
 import numpy as np
 import os
@@ -38,6 +39,7 @@ class RetinopathyClassificationModel(LightningModule):
         self.predictions = []
         self.classes = ['Severity 0', 'Severity 1', 'Severity 2', 'Severity 3', 'Severity 4']
         self.plot_save_dir = plot_save_dir
+        self.experiment = str(self.plot_save_dir.split('/')[-1])
 
         self.fc1_features = 512
 
@@ -131,7 +133,7 @@ class RetinopathyClassificationModel(LightningModule):
 
         print(" ######################## PLOTTING CM NOW ########################")
         cm = confusion_matrix(ground_truths, predictions)
-
+        
         if normalize:
             cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
             print("Normalized confusion matrix")
@@ -164,8 +166,9 @@ class RetinopathyClassificationModel(LightningModule):
     def test_epoch_end(self, outputs):
         
         #Plot confusion matrix when testing ends
+        cm_title = 'Confusion Matrix for ' + self.experiment
         self.plot_confusion_matrix(ground_truths = self.ground_truths, predictions = self.predictions, 
-                              classes = self.classes, plot_save_dir=self.plot_save_dir)
+                              classes = self.classes, plot_save_dir=self.plot_save_dir, title=cm_title)
 
     def configure_optimizers(self):
         
