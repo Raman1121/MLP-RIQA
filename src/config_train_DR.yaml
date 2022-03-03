@@ -35,7 +35,7 @@ dataset:
 save_model:
   log_model: False
   directory: '../saved_models/'
-  experiment: 'Model_Saving'
+  experiment: 'Reject'
   plotting_dir: '../plots/'
 
 wandb:

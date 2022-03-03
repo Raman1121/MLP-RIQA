@@ -1,0 +1,4 @@
+checkpoint_path: '/home/raman/MLP-RIQA/saved_models/Good_Images/MLP-RIQA-src/vztp07si/checkpoints/epoch=29-step=10859.ckpt'
+dataset: 'validation' #Options: ['train', 'validation', 'test']
+encoder: 'resnet18'
+num_classes: 5
