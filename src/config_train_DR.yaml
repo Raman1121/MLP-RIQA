@@ -11,6 +11,7 @@ train:
   train_df_path: '/home/raman/MLP-RIQA/Train_set_RIQA_DR_Labels.csv'  #Path to read the training dataset file
   aug_df_path: '/home/raman/MLP-RIQA/Augmented_train_set.csv'         #Path to read augmented training dataset file
   gpus: 1                 #Number of GPUs
+  categorical_partition: True #Options: [True, False, 'Augmented']
   cat_labels: ['Reject']  #Categorical Quality labels to include in the training set. Options: ['Good', 'Usable', 'Reject']
   lr: 0.001               #Learning Rate
   validation_split: 0.3   #Partition for validation data
@@ -37,6 +38,7 @@ save_model:
   directory: '../saved_models/'
   experiment: 'Reject'
   plotting_dir: '../plots/'
+  cmap_title: 'Good_Augmented tested on G_U_R'
 
 wandb:
   run_name: 'test-run1'
