@@ -10,6 +10,8 @@ train:
   num_classes: 5          #Number of target classes
   train_df_path: '/home/raman/MLP-RIQA/Train_set_RIQA_DR_Labels.csv'  #Path to read the training dataset file
   aug_df_path: '/home/raman/MLP-RIQA/Augmented_train_set.csv'         #Path to read augmented training dataset file
+  continuous_train_df_path: '/home/raman/MLP-RIQA/Train_Continuous_Labels.csv'  #Path to read the training file with continuous quality labels
+  continuous_test_df_path: '/home/raman/MLP-RIQA/Test_Continuous_Labels.csv'    #Path to read the test file with continuous quality labels
   gpus: 1                 #Number of GPUs
   categorical_partition: True #Options: [True, False, 'Augmented']
   cat_labels: ['Reject']  #Categorical Quality labels to include in the training set. Options: ['Good', 'Usable', 'Reject']
@@ -32,6 +34,8 @@ dataset:
   root_path: '/home/raman/MLP-RIQA/data/diabetic-retinopathy-detection/'                  #Root path to the images
   RIQA_train_labels: '/home/raman/MLP-RIQA/Annotated RIQA Labels files/train_set_result'  #Path to RIQA labels of training set
   RIQA_test_labels: '/home/raman/MLP-RIQA/Annotated RIQA Labels files/test_set_result'    #Path to RIQA labels of test set
+  RIQA_continuous_train: '/home/raman/MLP-RIQA/EyePACS_continuous_quality_scores/train_set_regression_result.csv'   #Path to Continuous RIQA labels of training set
+  RIQA_continuous_test: '/home/raman/MLP-RIQA/EyePACS_continuous_quality_scores/test_set_regression_result.csv'     #Path to Continuous RIQA labels of test set
 
 save_model:
   log_model: False
